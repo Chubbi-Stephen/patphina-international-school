@@ -1,15 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import { Save, CheckCircle } from 'lucide-react'
+import { Upload, Download, Copy, Save, CheckCircle } from 'lucide-react'
+import Papa from 'papaparse'
 import api from '../../utils/api'
 import toast from 'react-hot-toast'
+import { CURRENT_TERM, CURRENT_SESSION } from '../../utils/config'
 
 export default function TeacherResults() {
   const { user } = useAuth()
   const [selectedClass, setSelectedClass] = useState('')
   const [selectedSubject, setSelectedSubject] = useState('')
-  const [term, setTerm]       = useState('2nd Term')
-  const [session, setSession] = useState('2025/2026')
+  const [term, setTerm]       = useState(CURRENT_TERM)
+  const [session, setSession] = useState(CURRENT_SESSION)
   const [students, setStudents] = useState([])
   const [scores, setScores]   = useState({})
   const [saving, setSaving]   = useState(false)
@@ -22,12 +24,40 @@ export default function TeacherResults() {
   const subject = user?.subject || ''
 
   useEffect(() => {
-    if (classList.length > 0 && !selectedClass) {
+    if (!selectedClass && classList.length > 0) {
       setSelectedClass(classList[0])
       setSelectedSubject(subject)
     }
-  }, [user])
+  // Only run when classList or subject values change (derived from user)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [classList.join(','), subject])
 
+  const fetchExistingResults = async () => {
+    if (!selectedClass || !selectedSubject) return
+    try {
+      const response = await api.get(`/results`, {
+        params: {
+          class: selectedClass,
+          subject: selectedSubject,
+          term: CURRENT_TERM,
+          session: CURRENT_SESSION
+        }
+      })
+      const existingResults = response.data.results || []
+      const newScores = {}
+      students.forEach(s => {
+        const existing = existingResults.find(r => r.student_id === s.id)
+        newScores[s.id] = {
+          ca_score: existing ? existing.ca_score : '',
+          exam_score: existing ? existing.exam_score : ''
+        }
+      })
+      setScores(newScores)
+      setSaved(true) // If results are fetched, they are considered saved
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to fetch existing results')
+    }
+  }
   useEffect(() => {
     if (!selectedClass) return
     setSaved(false)
@@ -37,13 +67,16 @@ export default function TeacherResults() {
       const init = {}
       list.forEach(s => { init[s.id] = { ca_score: '', exam_score: '' } })
       setScores(init)
+    }).then(() => {
+      fetchExistingResults()
     })
-  }, [selectedClass])
+  }, [selectedClass, selectedSubject]) // Added selectedSubject to dependencies
 
   const handleScore = (id, field, value) => {
     const max = field === 'ca_score' ? 30 : 70
     const num = Math.min(Math.max(0, Number(value)), max)
     setScores(prev => ({ ...prev, [id]: { ...prev[id], [field]: num } }))
+    setSaved(false) // Mark as unsaved when score changes
   }
 
   const gradeFromTotal = (t) => {
@@ -53,20 +86,63 @@ export default function TeacherResults() {
   }
 
   const handleSubmit = async () => {
-    const results = students
+    const updated = students
       .filter(s => scores[s.id]?.ca_score !== '' && scores[s.id]?.exam_score !== '')
       .map(s => ({ student_id: s.id, subject: selectedSubject, ca_score: Number(scores[s.id].ca_score), exam_score: Number(scores[s.id].exam_score) }))
 
-    if (!results.length) return toast.error('Enter at least one score')
+    if (!updated.length) return toast.error('Enter at least one score')
     setSaving(true)
     try {
-      await api.post('/results/bulk', { results, term, session })
-      toast.success(`${results.length} results saved!`)
-      setSaved(true)
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to save')
-    } finally { setSaving(false) }
-  }
+        await api.post('/results/bulk', {
+          results: updated,
+          subject: selectedSubject,
+          class: selectedClass,
+          term: CURRENT_TERM,
+          session: CURRENT_SESSION
+        })
+        toast.success(`Saved results for ${updated.length} students`)
+        await fetchExistingResults()
+      } catch (err) { toast.error(err.response?.data?.message || 'Failed to save') }
+      finally { setSaving(false) }
+    }
+
+    const handleCsvUpload = (e) => {
+      const file = e.target.files?.[0]
+      if (!file) return
+
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          const imported = results.data.map(r => ({
+            student_id: parseInt(r.student_id),
+            reg_no: r.reg_no,
+            full_name: r.full_name,
+            ca_score: parseInt(r.ca_score || 0),
+            exam_score: parseInt(r.exam_score || 0)
+          })).filter(r => r.student_id)
+
+          if(!imported.length) return toast.error('Invalid CSV: No valid student records found')
+
+          // Map imported scores to the current students list
+          const newScores = { ...scores }
+          imported.forEach(importedStudent => {
+            if (newScores[importedStudent.student_id]) {
+              newScores[importedStudent.student_id] = {
+                ca_score: importedStudent.ca_score,
+                exam_score: importedStudent.exam_score
+              }
+            }
+          })
+          setScores(newScores)
+          setSaved(false) // Mark as unsaved after import
+          toast.success(`Imported ${imported.length} rows`)
+        },
+        error: (err) => {
+          toast.error('Error parsing CSV file');
+        }
+      })
+    }
 
   const filled = Object.values(scores).filter(s => s.ca_score !== '' && s.exam_score !== '').length
 

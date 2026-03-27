@@ -24,7 +24,7 @@ router.get('/', authenticate, requireRole('teacher','admin'), (req, res) => {
 // POST /api/questions
 router.post('/', authenticate, requireRole('teacher','admin'), (req, res) => {
   const { class: cls, subject, term, session, question, option_a, option_b, option_c, option_d, answer, marks } = req.body;
-  if (!cls || !subject || !question || !option_a || !option_b || !option_c || !option_d || !answer)
+  if (!cls || !subject || !term || !session || !question || !option_a || !option_b || !option_c || !option_d || !answer)
     return res.status(400).json({ success: false, message: 'All fields required' });
 
   const teacher = req.user.role === 'teacher'

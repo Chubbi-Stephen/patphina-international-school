@@ -15,8 +15,8 @@ export default function Sidebar({ links, roleLabel, roleColor = 'brand', onClose
 
   const colorMap = {
     brand:  { bg: 'bg-brand-600',  text: 'text-brand-600',  light: 'bg-brand-50' },
-    green:  { bg: 'bg-green-600',  text: 'text-green-600',  light: 'bg-green-50' },
-    purple: { bg: 'bg-purple-600', text: 'text-purple-600', light: 'bg-purple-50' },
+    green:  { bg: 'bg-brand-600',  text: 'text-brand-600',  light: 'bg-brand-50' },
+    purple: { bg: 'bg-brand-600', text: 'text-brand-600', light: 'bg-brand-50' },
   }
   const c = colorMap[roleColor] || colorMap.brand
 

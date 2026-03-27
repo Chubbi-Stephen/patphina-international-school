@@ -85,7 +85,7 @@ export default function AdminTeachers() {
                 <p className="text-xs text-gray-400 mb-2">Assigned Classes</p>
                 <div className="flex flex-wrap gap-1">
                   {t.classes.map((c,i) => (
-                    <span key={i} className="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium">{c.class_name}</span>
+                    <span key={i} className="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium">{c}</span>
                   ))}
                 </div>
               </div>

@@ -1,13 +1,14 @@
 import { Outlet } from 'react-router-dom'
 import { useState } from 'react'
-import { LayoutDashboard, Upload, HelpCircle, Users, Menu } from 'lucide-react'
+import { LayoutDashboard, Upload, HelpCircle, Users, Menu, ClipboardCheck } from 'lucide-react'
 import Sidebar from './Sidebar'
 
 const links = [
-  { to: '/teacher',            icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/teacher/students',   icon: Users,           label: 'My Students' },
-  { to: '/teacher/results',    icon: Upload,          label: 'Upload Results' },
-  { to: '/teacher/questions',  icon: HelpCircle,      label: 'Exam Questions' },
+  { to: '/teacher',            icon: LayoutDashboard,  label: 'Dashboard' },
+  { to: '/teacher/students',   icon: Users,            label: 'My Students' },
+  { to: '/teacher/attendance', icon: ClipboardCheck,   label: 'Mark Attendance' },
+  { to: '/teacher/results',    icon: Upload,           label: 'Upload Results' },
+  { to: '/teacher/questions',  icon: HelpCircle,       label: 'Exam Questions' },
 ]
 
 export default function TeacherLayout() {

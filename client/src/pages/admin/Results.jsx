@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Search, Trash2 } from 'lucide-react'
 import api from '../../utils/api'
 import toast from 'react-hot-toast'
+import { useDebounce } from '../../hooks/useDebounce'
 
 export default function AdminResults() {
   const [students, setStudents] = useState([])
@@ -11,6 +12,7 @@ export default function AdminResults() {
   const [loading, setLoading] = useState(false)
   const [classes, setClasses] = useState([])
   const [filterClass, setFilterClass] = useState('')
+  const debouncedSearch = useDebounce(search, 300)
 
   useEffect(() => {
     api.get('/admin/classes').then(r => setClasses(r.data.classes || []))
@@ -19,9 +21,9 @@ export default function AdminResults() {
   useEffect(() => {
     let url = '/students?'
     if (filterClass) url += `class=${filterClass}&`
-    if (search) url += `search=${search}&`
+    if (debouncedSearch) url += `search=${debouncedSearch}&`
     api.get(url).then(r => setStudents(r.data.students || []))
-  }, [filterClass, search])
+  }, [filterClass, debouncedSearch])
 
   const loadResults = (s) => {
     setSelected(s); setLoading(true)
@@ -116,7 +118,7 @@ export default function AdminResults() {
                           <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{r.term}</td>
                           <td className="px-3 py-2.5 text-center text-gray-600">{r.ca_score}</td>
                           <td className="px-3 py-2.5 text-center text-gray-600">{r.exam_score}</td>
-                          <td className="px-3 py-2.5 text-center font-bold text-gray-800">{r.total}</td>
+                          <td className="px-3 py-2.5 text-center font-bold text-gray-800">{Number(r.ca_score) + Number(r.exam_score)}</td>
                           <td className="px-3 py-2.5 text-center">
                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${gradeColor(r.grade)}`}>{r.grade}</span>
                           </td>

@@ -1,7 +1,8 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { Printer, TrendingUp } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import api from '../../utils/api'
+import { CURRENT_TERM, CURRENT_SESSION } from '../../utils/config'
 
 const gradeColor = (g = '') => {
   if (g.startsWith('A')) return 'bg-green-100 text-green-700'
@@ -20,9 +21,8 @@ export default function StudentResults() {
   const { user } = useAuth()
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(true)
-  const [term, setTerm] = useState('2nd Term')
-  const [session, setSession] = useState('2025/2026')
-  const printRef = useRef()
+  const [term, setTerm] = useState(CURRENT_TERM)
+  const [session, setSession] = useState(CURRENT_SESSION)
 
   useEffect(() => {
     setLoading(true)
@@ -31,10 +31,13 @@ export default function StudentResults() {
       .finally(() => setLoading(false))
   }, [term, session])
 
-  const total   = results.reduce((s, r) => s + r.total, 0)
-  const avg     = results.length ? Math.round(total / results.length) : 0
-  const highest = results.length ? Math.max(...results.map(r => r.total)) : 0
-  const lowest  = results.length ? Math.min(...results.map(r => r.total)) : 0
+  // Compute total from actual columns (no `total` column in DB)
+  const getTotal = (r) => Number(r.ca_score) + Number(r.exam_score)
+
+  const totalScore = results.reduce((s, r) => s + getTotal(r), 0)
+  const avg        = results.length ? Math.round(totalScore / results.length) : 0
+  const highest    = results.length ? Math.max(...results.map(getTotal)) : 0
+  const lowest     = results.length ? Math.min(...results.map(getTotal)) : 0
 
   const handlePrint = () => window.print()
 
@@ -71,10 +74,10 @@ export default function StudentResults() {
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label:'Total Score',  value: total,   color:'text-brand-700' },
-          { label:'Average',      value: `${avg}%`, color:'text-green-600' },
-          { label:'Highest',      value: highest,  color:'text-blue-600' },
-          { label:'Lowest',       value: lowest,   color:'text-orange-600' },
+          { label:'Total Score',  value: totalScore, color:'text-brand-700' },
+          { label:'Average',      value: `${avg}%`,  color:'text-green-600' },
+          { label:'Highest',      value: highest,    color:'text-blue-600' },
+          { label:'Lowest',       value: lowest,     color:'text-orange-600' },
         ].map(s => (
           <div key={s.label} className="card text-center py-4">
             <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
@@ -84,7 +87,7 @@ export default function StudentResults() {
       </div>
 
       {/* Result sheet */}
-      <div ref={printRef} className="card overflow-x-auto print:shadow-none">
+      <div className="card overflow-x-auto print:shadow-none">
         {/* Print header */}
         <div className="hidden print:flex items-center gap-4 mb-6 pb-4 border-b-2 border-brand-700">
           <div className="w-16 h-16 rounded-full bg-brand-700 flex items-center justify-center text-white text-2xl font-bold">P</div>
@@ -133,7 +136,7 @@ export default function StudentResults() {
                     <td className="px-4 py-3 font-medium text-gray-800">{r.subject}</td>
                     <td className="px-4 py-3 text-center text-gray-600">{r.ca_score}</td>
                     <td className="px-4 py-3 text-center text-gray-600">{r.exam_score}</td>
-                    <td className="px-4 py-3 text-center font-bold text-gray-800">{r.total}</td>
+                    <td className="px-4 py-3 text-center font-bold text-gray-800">{getTotal(r)}</td>
                     <td className="px-4 py-3 text-center">
                       <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${gradeColor(r.grade)}`}>{r.grade}</span>
                     </td>
@@ -145,7 +148,7 @@ export default function StudentResults() {
                 <tr className="bg-brand-50 font-semibold">
                   <td className="px-4 py-3 text-brand-800">TOTAL / AVERAGE</td>
                   <td colSpan={2} className="px-4 py-3"/>
-                  <td className="px-4 py-3 text-center text-brand-800 font-bold">{total} / {avg}%</td>
+                  <td className="px-4 py-3 text-center text-brand-800 font-bold">{totalScore} / {avg}%</td>
                   <td colSpan={2} className="px-4 py-3"/>
                 </tr>
               </tfoot>

@@ -10,12 +10,19 @@ app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173', creden
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-app.use('/api/auth',      require('./routes/auth'));
-app.use('/api/students',  require('./routes/students'));
-app.use('/api/teachers',  require('./routes/teachers'));
-app.use('/api/results',   require('./routes/results'));
-app.use('/api/questions', require('./routes/questions'));
-app.use('/api/admin',     require('./routes/admin'));
+app.use('/api/auth',       require('./routes/auth'));
+app.use('/api/students',   require('./routes/students'));
+app.use('/api/teachers',   require('./routes/teachers'));
+app.use('/api/results',    require('./routes/results'));
+app.use('/api/questions',  require('./routes/questions'));
+app.use('/api/admin',      require('./routes/admin'));
+app.use('/api/attendance', require('./routes/attendance'));
+app.use('/api/fees',       require('./routes/fees'));
+app.use('/api/admissions', require('./routes/admissions'));
+app.use('/api/subjects',   require('./routes/subjects'));
+app.use('/api/sessions',   require('./routes/sessions'));
+app.use('/api/timetable',  require('./routes/timetable'));
+app.use('/api/audit',      require('./routes/audit'));
 
 app.get('/api/health', (_, res) => res.json({ status: 'ok', app: 'Patphina School System' }));
 

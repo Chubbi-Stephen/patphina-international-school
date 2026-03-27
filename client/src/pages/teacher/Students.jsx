@@ -16,7 +16,8 @@ export default function TeacherStudents() {
 
   useEffect(() => {
     if (classList.length && !selectedClass) setSelectedClass(classList[0])
-  }, [user])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [classList.join(',')])
 
   useEffect(() => {
     if (!selectedClass) return
@@ -117,7 +118,7 @@ export default function TeacherStudents() {
                             <td className="py-1.5 text-gray-700">{r.subject}</td>
                             <td className="py-1.5 text-center text-gray-500">{r.ca_score}</td>
                             <td className="py-1.5 text-center text-gray-500">{r.exam_score}</td>
-                            <td className="py-1.5 text-center font-bold text-gray-800">{r.total || (r.ca_score + r.exam_score)}</td>
+                            <td className="py-1.5 text-center font-bold text-gray-800">{Number(r.ca_score) + Number(r.exam_score)}</td>
                             <td className={`py-1.5 text-center font-bold text-xs ${gradeColor(r.grade)}`}>{r.grade}</td>
                           </tr>
                         ))}

@@ -5,8 +5,12 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
-// Attach token to every request
+// Attach token and Localtunnel bypass header to every request
 api.interceptors.request.use((config) => {
+  // Bypasses the Localtunnel splash screen for background AJAX requests
+  config.headers['Bypass-Tunnel-Reminder'] = 'true'
+  config.headers['ngrok-skip-browser-warning'] = 'true' // For ngrok
+  
   const token = localStorage.getItem('token')
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config

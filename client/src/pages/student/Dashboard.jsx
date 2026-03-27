@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { FileText, User, Megaphone, BookOpen, ChevronRight } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import api from '../../utils/api'
+import { CURRENT_TERM, CURRENT_SESSION } from '../../utils/config'
 
 export default function StudentDashboard() {
   const { user } = useAuth()
@@ -12,7 +13,7 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     Promise.all([
-      api.get('/results/me?term=2nd Term&session=2025/2026'),
+      api.get(`/results/me?term=${encodeURIComponent(CURRENT_TERM)}&session=${encodeURIComponent(CURRENT_SESSION)}`),
       api.get('/admin/announcements?target=students'),
     ]).then(([r, a]) => {
       setResults(r.data.results || [])
@@ -21,7 +22,7 @@ export default function StudentDashboard() {
   }, [])
 
   const avg = results.length
-    ? Math.round(results.reduce((s, r) => s + r.total, 0) / results.length)
+    ? Math.round(results.reduce((s, r) => s + (r.ca_score + r.exam_score), 0) / results.length)
     : 0
 
   const gradeColor = (g = '') => {
@@ -62,7 +63,7 @@ export default function StudentDashboard() {
         </div>
         <div className="card text-center col-span-2 md:col-span-1">
           <p className="text-3xl font-bold text-purple-600">
-            {results.filter(r => r.grade?.startsWith('A') || r.grade?.startsWith('B')).length}
+            {results.filter(r => (r.grade || '').startsWith('A') || (r.grade || '').startsWith('B')).length}
           </p>
           <p className="text-gray-500 text-sm mt-1">A/B Grades</p>
         </div>
@@ -98,7 +99,7 @@ export default function StudentDashboard() {
                     <td className="py-2.5 font-medium text-gray-700">{r.subject}</td>
                     <td className="py-2.5 text-right text-gray-500">{r.ca_score}</td>
                     <td className="py-2.5 text-right text-gray-500">{r.exam_score}</td>
-                    <td className="py-2.5 text-right font-semibold text-gray-800">{r.total}</td>
+                    <td className="py-2.5 text-right font-semibold text-gray-800">{Number(r.ca_score) + Number(r.exam_score)}</td>
                     <td className="py-2.5 text-right">
                       <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${gradeColor(r.grade)}`}>{r.grade}</span>
                     </td>

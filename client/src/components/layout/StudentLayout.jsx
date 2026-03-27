@@ -1,11 +1,13 @@
 import { Outlet } from 'react-router-dom'
 import { useState } from 'react'
-import { LayoutDashboard, FileText, User, Menu } from 'lucide-react'
+import { LayoutDashboard, FileText, User, Menu, CreditCard, Laptop } from 'lucide-react'
 import Sidebar from './Sidebar'
 
 const links = [
   { to: '/student',         icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/student/results', icon: FileText,        label: 'My Results' },
+  { to: '/student/fees',    icon: CreditCard,      label: 'My Fees' },
+  { to: '/student/exams',   icon: Laptop,          label: 'CBT Exams' },
   { to: '/student/profile', icon: User,            label: 'My Profile' },
 ]
 

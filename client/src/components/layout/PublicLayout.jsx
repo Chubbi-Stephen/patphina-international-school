@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 import { Menu, X, Phone, Mail, GraduationCap } from 'lucide-react'
+import { SCHOOL_NAME, SCHOOL_ADDRESS, SCHOOL_EMAIL, SCHOOL_PHONE, SCHOOL_FOUNDED } from '../../utils/config'
 
 export default function PublicLayout() {
   const [open, setOpen] = useState(false)
@@ -12,8 +13,8 @@ export default function PublicLayout() {
       {/* Topbar */}
       <div className="bg-brand-900 text-white/70 text-xs py-2 px-6 flex justify-between flex-wrap gap-2">
         <div className="flex gap-4 items-center">
-          <span className="flex items-center gap-1"><Phone size={11}/> +234 000 000 0000</span>
-          <span className="flex items-center gap-1"><Mail size={11}/> info@patphina.edu.ng</span>
+          <span className="flex items-center gap-1"><Phone size={11}/> {SCHOOL_PHONE}</span>
+          <span className="flex items-center gap-1"><Mail size={11}/> {SCHOOL_EMAIL}</span>
         </div>
         <span>Mon – Fri: 7:30am – 3:30pm</span>
       </div>
@@ -66,7 +67,7 @@ export default function PublicLayout() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
             <p className="text-white font-semibold mb-2">Patphina International School</p>
-            <p className="text-sm leading-relaxed">Providing quality education in the heart of Ojo, Lagos. Nurturing minds, building futures since [YEAR].</p>
+            <p className="text-sm leading-relaxed">Providing quality education in the heart of Ojo, Lagos. Nurturing minds, building futures since {SCHOOL_FOUNDED}.</p>
           </div>
           <div>
             <p className="text-white font-semibold mb-3 text-sm">Quick Links</p>
@@ -80,9 +81,9 @@ export default function PublicLayout() {
           <div>
             <p className="text-white font-semibold mb-3 text-sm">Contact</p>
             <ul className="space-y-2 text-sm">
-              <li>📍 Ojo Barracks, Lagos</li>
-              <li>📞 +234 000 000 0000</li>
-              <li>✉️ info@patphina.edu.ng</li>
+              <li>📍 {SCHOOL_ADDRESS}</li>
+              <li>📞 {SCHOOL_PHONE}</li>
+              <li>✉️ {SCHOOL_EMAIL}</li>
             </ul>
           </div>
         </div>

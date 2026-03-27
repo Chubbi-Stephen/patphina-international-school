@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import { useState } from 'react'
-import { LayoutDashboard, Users, UserCheck, FileText, Megaphone, Menu } from 'lucide-react'
+import { LayoutDashboard, Users, UserCheck, FileText, Megaphone, Menu, Calendar, BookOpen, Clock, CreditCard, ClipboardList, ShieldAlert, UserCog } from 'lucide-react'
 import Sidebar from './Sidebar'
 
 const links = [
@@ -8,7 +8,15 @@ const links = [
   { to: '/admin/students',       icon: Users,           label: 'Students' },
   { to: '/admin/teachers',       icon: UserCheck,       label: 'Teachers' },
   { to: '/admin/results',        icon: FileText,        label: 'Results' },
+  { to: '/admin/attendance',     icon: ClipboardList,   label: 'Attendance' },
+  { to: '/admin/timetable',      icon: Clock,           label: 'Timetable' },
+  { to: '/admin/subjects',       icon: BookOpen,        label: 'Subjects' },
+  { to: '/admin/fees',           icon: CreditCard,      label: 'Fees & Payments' },
+  { to: '/admin/admissions',     icon: Users,           label: 'Admissions' },
   { to: '/admin/announcements',  icon: Megaphone,       label: 'Announcements' },
+  { to: '/admin/sessions',       icon: Calendar,        label: 'Sessions & Terms' },
+  { to: '/admin/audit-log',      icon: ShieldAlert,     label: 'Audit Log' },
+  { to: '/admin/profile',        icon: UserCog,         label: 'Profile & Settings' },
 ]
 
 export default function AdminLayout() {

@@ -51,10 +51,35 @@ router.delete('/announcements/:id', authenticate, requireRole('admin'), (req, re
 // POST /api/admin/reset-password
 router.post('/reset-password', authenticate, requireRole('admin'), (req, res) => {
   const { identifier, newPassword } = req.body;
+  if (!identifier || !newPassword || newPassword.length < 6)
+    return res.status(400).json({ success: false, message: 'identifier and newPassword (min 6 chars) are required' });
   const user = db.prepare('SELECT id FROM users WHERE username = ?').get(identifier);
   if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-  db.prepare('UPDATE users SET password = ? WHERE id = ?').run(bcrypt.hashSync(newPassword || 'student123', 10), user.id);
+  db.prepare('UPDATE users SET password = ? WHERE id = ?').run(bcrypt.hashSync(newPassword, 10), user.id);
   res.json({ success: true, message: 'Password reset' });
+});
+
+// GET /api/admin/export/students
+router.get('/export/students', authenticate, requireRole('admin'), (req, res) => {
+  const { class: cls } = req.query;
+  let q = 'SELECT reg_no, full_name, class, gender, parent_name, parent_phone FROM students WHERE is_active=1';
+  const p = [];
+  if (cls) { q += ' AND class=?'; p.push(cls); }
+  q += ' ORDER BY class, full_name';
+  res.json({ success: true, students: db.prepare(q).all(...p) });
+});
+
+// GET /api/admin/export/results
+router.get('/export/results', authenticate, requireRole('admin'), (req, res) => {
+  const { class: cls, term, session } = req.query;
+  if (!cls || !term || !session) return res.status(400).json({ success: false, message: 'class, term, session required' });
+  const rows = db.prepare(`
+    SELECT s.reg_no, s.full_name, r.subject, r.ca_score, r.exam_score, (r.ca_score+r.exam_score) as total, r.grade
+    FROM results r JOIN students s ON s.id = r.student_id
+    WHERE r.class=? AND r.term=? AND r.session=?
+    ORDER BY s.full_name, r.subject
+  `).all(cls, term, session);
+  res.json({ success: true, results: rows });
 });
 
 module.exports = router;

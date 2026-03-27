@@ -13,21 +13,32 @@ import StudentLayout  from './components/layout/StudentLayout'
 import StudentDash    from './pages/student/Dashboard'
 import StudentResults from './pages/student/Results'
 import StudentProfile from './pages/student/Profile'
+import StudentFees    from './pages/student/Fees'
+import StudentExams   from './pages/student/Exams'
 
 // Teacher pages
-import TeacherLayout  from './components/layout/TeacherLayout'
-import TeacherDash    from './pages/teacher/Dashboard'
-import TeacherResults from './pages/teacher/Results'
+import TeacherLayout    from './components/layout/TeacherLayout'
+import TeacherDash      from './pages/teacher/Dashboard'
+import TeacherResults   from './pages/teacher/Results'
 import TeacherQuestions from './pages/teacher/Questions'
 import TeacherStudents  from './pages/teacher/Students'
+import TeacherAttendance from './pages/teacher/Attendance'
 
 // Admin pages
-import AdminLayout    from './components/layout/AdminLayout'
-import AdminDash      from './pages/admin/Dashboard'
-import AdminStudents  from './pages/admin/Students'
-import AdminTeachers  from './pages/admin/Teachers'
-import AdminResults   from './pages/admin/Results'
+import AdminLayout        from './components/layout/AdminLayout'
+import AdminDash          from './pages/admin/Dashboard'
+import AdminStudents      from './pages/admin/Students'
+import AdminTeachers      from './pages/admin/Teachers'
+import AdminResults       from './pages/admin/Results'
 import AdminAnnouncements from './pages/admin/Announcements'
+import AdminAttendance    from './pages/admin/Attendance'
+import AdminFees          from './pages/admin/Fees'
+import AdminAdmissions    from './pages/admin/Admissions'
+import AdminTimetable     from './pages/admin/Timetable'
+import AdminSessions      from './pages/admin/Sessions'
+import AdminSubjects      from './pages/admin/Subjects'
+import AdminAuditLog      from './pages/admin/AuditLog'
+import AdminProfile       from './pages/admin/Profile'
 
 function ProtectedRoute({ children, role }) {
   const { user } = useAuth()
@@ -63,6 +74,8 @@ export default function App() {
           <Route index          element={<StudentDash />} />
           <Route path="results" element={<StudentResults />} />
           <Route path="profile" element={<StudentProfile />} />
+          <Route path="fees"    element={<StudentFees />} />
+          <Route path="exams"   element={<StudentExams />} />
         </Route>
 
         {/* Teacher */}
@@ -71,6 +84,7 @@ export default function App() {
           <Route path="results"    element={<TeacherResults />} />
           <Route path="questions"  element={<TeacherQuestions />} />
           <Route path="students"   element={<TeacherStudents />} />
+          <Route path="attendance" element={<TeacherAttendance />} />
         </Route>
 
         {/* Admin */}
@@ -80,6 +94,14 @@ export default function App() {
           <Route path="teachers"        element={<AdminTeachers />} />
           <Route path="results"         element={<AdminResults />} />
           <Route path="announcements"   element={<AdminAnnouncements />} />
+          <Route path="attendance"      element={<AdminAttendance />} />
+          <Route path="fees"            element={<AdminFees />} />
+          <Route path="admissions"      element={<AdminAdmissions />} />
+          <Route path="timetable"       element={<AdminTimetable />} />
+          <Route path="sessions"        element={<AdminSessions />} />
+          <Route path="subjects"        element={<AdminSubjects />} />
+          <Route path="audit-log"       element={<AdminAuditLog />} />
+          <Route path="profile"         element={<AdminProfile />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

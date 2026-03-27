@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Plus, Search, Pencil, Trash2, X, Save, Eye } from 'lucide-react'
 import api from '../../utils/api'
 import toast from 'react-hot-toast'
+import { useDebounce } from '../../hooks/useDebounce'
 
 const blank = { reg_no:'', full_name:'', class:'', dob:'', gender:'', parent_name:'', parent_phone:'', address:'', password:'student123' }
 
@@ -17,14 +18,15 @@ export default function AdminStudents() {
   const [saving, setSaving] = useState(false)
   const [viewing, setViewing] = useState(null)
   const [viewResults, setViewResults] = useState([])
+  const debouncedSearch = useDebounce(search, 300)
 
   const load = () => {
     let url = '/students?'
     if (filterClass) url += `class=${filterClass}&`
-    if (search) url += `search=${search}&`
+    if (debouncedSearch) url += `search=${debouncedSearch}&`
     api.get(url).then(r => setStudents(r.data.students || [])).finally(() => setLoading(false))
   }
-  useEffect(load, [filterClass, search])
+  useEffect(load, [filterClass, debouncedSearch])
   useEffect(() => {
     api.get('/admin/classes').then(r => setClasses(r.data.classes || []))
   }, [])
@@ -190,7 +192,7 @@ export default function AdminStudents() {
                           <td className="py-1.5 text-gray-700">{r.subject}</td>
                           <td className="py-1.5 text-center">{r.ca_score}</td>
                           <td className="py-1.5 text-center">{r.exam_score}</td>
-                          <td className="py-1.5 text-center font-bold">{r.total}</td>
+                          <td className="py-1.5 text-center font-bold">{Number(r.ca_score) + Number(r.exam_score)}</td>
                           <td className={`py-1.5 text-center font-bold ${gradeColor(r.grade)}`}>{r.grade}</td>
                         </tr>
                       ))}
