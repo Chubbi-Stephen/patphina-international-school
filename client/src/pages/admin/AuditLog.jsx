@@ -6,15 +6,25 @@ export default function AdminAuditLog() {
   const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+  const limit = 50
 
   useEffect(() => {
     setLoading(true)
     const t = setTimeout(() => {
-      api.get(`/audit?limit=100${search ? `&username=${encodeURIComponent(search)}` : ''}`)
-        .then(r => setLogs(r.data.logs || [])).finally(()=>setLoading(false))
+      const offset = (page - 1) * limit
+      api.get(`/audit?limit=${limit}&offset=${offset}${search ? `&username=${encodeURIComponent(search)}` : ''}`)
+        .then(r => {
+          setLogs(r.data.logs || [])
+          setTotal(r.data.total || 0)
+        }).finally(()=>setLoading(false))
     }, 400)
     return () => clearTimeout(t)
-  }, [search])
+  }, [search, page])
+
+  // Reset page when search term changes
+  useEffect(() => setPage(1), [search])
 
   return (
     <div className="space-y-4 fade-up">
@@ -51,6 +61,25 @@ export default function AdminAuditLog() {
             </tbody>
           </table>
         )}
+
+        {/* Pagination Footer */}
+        <div className="p-4 border-t flex items-center justify-between text-sm text-gray-500 bg-gray-50">
+          <div>Showing {total === 0 ? 0 : (page - 1) * limit + 1} to {Math.min(page * limit, total)} of {total} entries</div>
+          <div className="flex gap-2">
+            <button 
+              disabled={page === 1} 
+              onClick={() => setPage(p => p - 1)} 
+              className="px-3 py-1.5 rounded-lg bg-white border border-gray-200 hover:bg-gray-100 disabled:opacity-50 font-medium text-gray-700 transition-colors">
+              Previous
+            </button>
+            <button 
+              disabled={page * limit >= total} 
+              onClick={() => setPage(p => p + 1)} 
+              className="px-3 py-1.5 rounded-lg bg-white border border-gray-200 hover:bg-gray-100 disabled:opacity-50 font-medium text-gray-700 transition-colors">
+              Next
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -18,8 +18,8 @@ export default function TeacherQuestions() {
   const classList = user?.classes || []
   const subject   = user?.subject  || ''
 
-  const load = () => api.get('/questions').then(r => setQuestions(r.data.questions || [])).finally(() => setLoading(false))
-  useEffect(load, [])
+  const load = () => { api.get('/questions').then(r => setQuestions(r.data.questions || [])).finally(() => setLoading(false)) }
+  useEffect(() => { load() }, [])
 
   const openNew = () => {
     setForm({ ...blank, class: classList[0] || '', subject })

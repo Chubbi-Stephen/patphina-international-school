@@ -13,7 +13,7 @@ export default function AdminFees() {
     api.get(`/fees/arrears?term=${encodeURIComponent(CURRENT_TERM)}&session=${encodeURIComponent(CURRENT_SESSION)}`)
       .then(r => setArrears(r.arrears || r.data.arrears || [])).finally(()=>setLoading(false))
   }
-  useEffect(load, [])
+  useEffect(() => { load() }, [])
 
   const totalArrears = arrears.reduce((s,f) => s + f.balance, 0)
 

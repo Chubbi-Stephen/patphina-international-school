@@ -13,8 +13,10 @@ export default function AdminTeachers() {
   const [editing, setEditing] = useState(null)
   const [saving, setSaving] = useState(false)
 
-  const load = () => api.get('/teachers').then(r => setTeachers(r.data.teachers || [])).finally(() => setLoading(false))
-  useEffect(load, [])
+  const load = () => { 
+    api.get('/teachers').then(r => setTeachers(r.data.teachers || [])).finally(() => setLoading(false)) 
+  }
+  useEffect(() => { load() }, [])
 
   const openEdit = (t) => {
     setForm({ staff_id:t.staff_id, full_name:t.full_name, subject:t.subject, email:t.email||'', phone:t.phone||'', password:'' })

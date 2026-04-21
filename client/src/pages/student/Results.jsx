@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Printer, TrendingUp } from 'lucide-react'
+import { Printer, TrendingUp, Download } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import api from '../../utils/api'
 import { CURRENT_TERM, CURRENT_SESSION } from '../../utils/config'
+import { generateReportCardPDF } from '../../components/pdf/ReportCardDoc'
 
 const gradeColor = (g = '') => {
   if (g.startsWith('A')) return 'bg-green-100 text-green-700'
@@ -67,6 +68,11 @@ export default function StudentResults() {
           </select>
           <button onClick={handlePrint} className="btn-secondary flex items-center gap-2 py-2">
             <Printer size={15}/> Print
+          </button>
+          <button 
+            onClick={() => generateReportCardPDF(user, results, { term, session }, { totalScore, maxScore: results.length * 100, average: avg, studentPos: results[0]?.position || '-', classSize: results[0]?.class_size || '-' })}
+            className="flex items-center gap-2 py-2 px-4 bg-gray-800 hover:bg-gray-900 text-white font-medium rounded-lg text-sm transition-colors shadow-sm">
+            <Download size={15}/> Official PDF
           </button>
         </div>
       </div>

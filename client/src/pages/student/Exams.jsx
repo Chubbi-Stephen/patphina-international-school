@@ -1,20 +1,29 @@
 import { useState, useEffect } from 'react'
 import { Laptop, Play, CheckCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import api from '../../utils/api'
 import { CURRENT_TERM, CURRENT_SESSION } from '../../utils/config'
 
 export default function StudentExams() {
-  const [exams, setExams] = useState([])
+  const [subjects, setSubjects] = useState([])
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
 
   useEffect(() => {
-    // Only show CBT questions if they exist for the class/term/session
-    // In a real scenario, the teacher 'publishes' the exam.
-    // For now, we list subjects that have questions in the DB.
-    api.get(`/questions?subject=all&term=${CURRENT_TERM}&session=${CURRENT_SESSION}`) // We'll adapt questions route
-       .then(r => setExams(r.data.subjects || []))
-       .catch(() => setExams([])) // Just a placeholder for CBT logic
-       .finally(()=> setLoading(false))
+    // List subjects that have active questions registered in the system
+    api.get(`/questions/student?subject=all&term=${CURRENT_TERM}&session=${CURRENT_SESSION}`)
+       .then(r => {
+         // Because we queried the backend for 'all', we might just fetch the unique subject list, OR 
+         // Realistically we can query `GET /subjects` since students take tests for their class subjects.
+       }).catch(() => {})
+       
+    // Fetch user's class subjects to display as Exams
+    api.get('/students/me').then(r => {
+      const cls = r.data.student.class
+      api.get(`/subjects?class=${encodeURIComponent(cls)}`).then(res => {
+        setSubjects(res.data.subjects || [])
+      }).finally(()=>setLoading(false))
+    })
   }, [])
 
   return (
@@ -27,12 +36,24 @@ export default function StudentExams() {
         <Laptop size={60} className="text-brand-400 opacity-50 hidden sm:block"/>
       </div>
 
-      <div className="card p-12 text-center text-gray-500 border border-dashed border-gray-300">
-        <Laptop size={48} className="mx-auto text-gray-300 mb-4"/>
-        <h3 className="text-lg font-bold text-gray-700">No active exams right now.</h3>
-        <p className="mt-2 text-sm">Your teachers will notify you when a test is published and ready to take.</p>
-        {/* The CBT Engine implementation is placeholder as requested, building out the full testing loop takes a dedicated chunk of work, but the shell is here. */}
-      </div>
+      {loading ? <div className="text-center p-12 text-gray-400">Loading exams...</div> : (
+        <div className="grid md:grid-cols-2 gap-4">
+          {subjects.map(s => (
+            <div key={s.id} className="card p-5 hover:shadow-lg transition-all border border-gray-100 flex items-center justify-between group">
+              <div>
+                <h3 className="font-bold text-gray-800 text-lg">{s.name}</h3>
+                <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest">{CURRENT_TERM}</p>
+              </div>
+              <button 
+                onClick={() => navigate(`/student/exams/${encodeURIComponent(s.name)}`)}
+                className="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center group-hover:bg-brand-600 group-hover:text-white transition-colors">
+                <Play size={16} fill="currentColor"/>
+              </button>
+            </div>
+          ))}
+          {subjects.length === 0 && <div className="col-span-2 text-center p-12 text-gray-400">No exams available for your class.</div>}
+        </div>
+      )}
     </div>
   )
 }

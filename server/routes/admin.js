@@ -26,12 +26,18 @@ router.get('/classes', authenticate, requireRole('admin','teacher'), (req, res) 
 
 // GET /api/admin/announcements
 router.get('/announcements', authenticate, (req, res) => {
-  const { target } = req.query;
-  let q = 'SELECT * FROM announcements WHERE 1=1';
-  const p = [];
-  if (target) { q += ' AND (target = ? OR target = "all")'; p.push(target); }
-  q += ' ORDER BY created_at DESC';
-  res.json({ success: true, announcements: db.prepare(q).all(...p) });
+  try {
+    const { target } = req.query;
+    let q = 'SELECT * FROM announcements WHERE 1=1';
+    const p = [];
+    if (target) { q += " AND (target = ? OR target = 'all')"; p.push(target); }
+    q += ' ORDER BY created_at DESC';
+    
+    res.json({ success: true, announcements: db.prepare(q).all(...p) });
+  } catch (err) {
+    console.error('[Announcements API Error]:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
 });
 
 // POST /api/admin/announcements

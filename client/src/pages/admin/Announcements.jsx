@@ -10,8 +10,8 @@ export default function AdminAnnouncements() {
   const [form, setForm] = useState({ title:'', body:'', target:'all' })
   const [saving, setSaving] = useState(false)
 
-  const load = () => api.get('/admin/announcements').then(r => setAnnouncements(r.data.announcements || [])).finally(()=>setLoading(false))
-  useEffect(load, [])
+  const load = () => { api.get('/admin/announcements').then(r => setAnnouncements(r.data.announcements || [])).finally(()=>setLoading(false)) }
+  useEffect(() => { load() }, [])
 
   const handleSave = async (e) => {
     e.preventDefault()

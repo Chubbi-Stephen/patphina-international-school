@@ -15,6 +15,7 @@ import StudentResults from './pages/student/Results'
 import StudentProfile from './pages/student/Profile'
 import StudentFees    from './pages/student/Fees'
 import StudentExams   from './pages/student/Exams'
+import TakeExam       from './pages/student/TakeExam'
 
 // Teacher pages
 import TeacherLayout    from './components/layout/TeacherLayout'
@@ -76,6 +77,7 @@ export default function App() {
           <Route path="profile" element={<StudentProfile />} />
           <Route path="fees"    element={<StudentFees />} />
           <Route path="exams"   element={<StudentExams />} />
+          <Route path="exams/:subject" element={<TakeExam />} />
         </Route>
 
         {/* Teacher */}

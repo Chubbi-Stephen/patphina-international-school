@@ -1,22 +1,34 @@
 const express = require('express');
 const bcrypt  = require('bcryptjs');
 const multer  = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const path    = require('path');
 const db      = require('../db/database');
 const { authenticate, requireRole } = require('../middleware/auth');
 const router  = express.Router();
 
-// Multer setup for student photos
-const storage = multer.diskStorage({
-  destination: 'uploads/photos/',
-  filename: (req, file, cb) => cb(null, `student_${Date.now()}${path.extname(file.originalname)}`)
-});
-const upload = multer({ storage, limits: { fileSize: 2 * 1024 * 1024 } }); // 2MB limit
+// Smart storage: Use Cloudinary if env var exists, else fallback to local disk
+let storage;
+if (process.env.CLOUDINARY_URL) {
+  storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: { folder: 'patphina_students', allowed_formats: ['jpg', 'png', 'jpeg'] },
+  });
+} else {
+  storage = multer.diskStorage({
+    destination: 'uploads/photos/',
+    filename: (req, file, cb) => cb(null, `student_${Date.now()}${path.extname(file.originalname)}`)
+  });
+}
+const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB limit
 
 // Add photo upload endpoint
 router.post('/upload-photo', authenticate, upload.single('photo'), (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
-  const photoUrl = `/uploads/photos/${req.file.filename}`;
+  
+  const photoUrl = process.env.CLOUDINARY_URL ? req.file.path : `/uploads/photos/${req.file.filename}`;
+  
   // Allow student to update their own, or admin to update any
   const userId = req.body.studentId ? 
     db.prepare('SELECT user_id FROM students WHERE id=?').get(req.body.studentId)?.user_id : req.user.userId;
@@ -60,7 +72,13 @@ router.post('/promote', authenticate, requireRole('admin'), (req, res) => {
   res.json({ success: true, message: `Promoted ${r.changes} students` });
 });
 
-// Existing routes...
+// GET /api/students/me
+router.get('/me', authenticate, requireRole('student'), (req, res) => {
+  const student = db.prepare('SELECT * FROM students WHERE user_id = ?').get(req.user.userId);
+  if (!student) return res.status(404).json({ success: false, message: 'Student profile not found' });
+  res.json({ success: true, student });
+});
+
 // GET /api/students
 router.get('/', authenticate, requireRole('admin', 'teacher'), (req, res) => {
   const { class: cls, search, limit = 500, offset = 0 } = req.query;
